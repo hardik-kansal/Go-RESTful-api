@@ -18,6 +18,7 @@ func (s *APIserver) run() {
 	router := mux.NewRouter()
 	subrouter:=router.PathPrefix("api/v1").Subrouter()
 
+	// Adding services to router
 	TasksService:=NewTaskService(s.store)
 	TasksService.registerRoutes(subrouter)
 

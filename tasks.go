@@ -34,7 +34,7 @@ func (s *TasksService) handleCreateTask(w http.ResponseWriter,r *http.Request){
 	defer r.Body.Close()
 
 	var task *Task
-	err = json.Unmarshal(body, &task) // case insesnitive and maps json type not actual 
+	err = json.Unmarshal(body, &task) // body json txt is case insensitive and body json must match with struct json name.
 	log.Println("task--",task)
 	if err != nil {
 		WriteJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Invalid request payload"})
@@ -67,7 +67,6 @@ func validateTaskPayload(task *Task) error {
 	}
 
 	if task.AssignedToID == 0 {
-		log.Println("here is error")
 		return errUserIDRequired
 	}
 

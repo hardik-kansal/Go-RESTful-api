@@ -1,7 +1,6 @@
 package main
 import (
 	"database/sql"
-	"log"
 )
 
 type Store struct{
@@ -16,13 +15,11 @@ func (s* Store) CreateTask(t *Task)(*Task,error){
 	rows, err := s.db.Exec("INSERT INTO tasks (name,projectId,AssignedToID) VALUES (?, ?, ?)", t.Name, t.ProjectID, t.AssignedToID)
 
 	if err != nil {
-		log.Println("eror is here 111")
 		return nil, err
 	}
 
 	id, err := rows.LastInsertId()
 	if err != nil {
-		log.Println("eror is here 222")
 		return nil, err
 	}
 
@@ -48,16 +45,3 @@ func (s *Store) CreateUser(u *User) (*User, error) {
 	u.ID = id
 	return u, nil
 }
-/* id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-			name VARCHAR(255) NOT NULL,
-			status ENUM('TODO', 'IN_PROGRESS', 'IN_TESTING', 'DONE') NOT NULL DEFAULT 'TODO',
-			projectId INT UNSIGNED NOT NULL,
-			AssignedToID INT UNSIGNED NOT NULL,
-			createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-			PRIMARY KEY (id),
-			FOREIGN KEY (AssignedToID) REFERENCES users(id),
-			FOREIGN KEY (projectId) REFERENCES projects(id)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-	`)
- */

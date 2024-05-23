@@ -10,6 +10,27 @@ import (
 	"github.com/gorilla/mux"
 )
 
+/*
+
+handleUserRegister -> get Payload from body and unmarshall it with desired struct type
+-> hashpassword -> sql query for create user -> createjwt (userId got from sql entry)
+-> setcookie under header "Authorization" value "Token"
+
+handlecreateTask -> JWT auTH -> get Payload from body and unmarshall it with desired struct type
+-> sql query for create task
+
+JWT auth
+->func GetTokenFromRequest(r *http.Request) string {
+	tokenAuth := r.Header.Get("Authorization")
+
+->validateJWT func
+
+->claims := token.Claims.(jwt.MapClaims)
+	userID := claims["userID"].(string)
+	_, err = store.GetUserByID(userID)
+
+*/
+
 var errEmailRequired = errors.New("email is required")
 var errFirstNameRequired = errors.New("first name is required")
 var errLastNameRequired = errors.New("last name is required")
@@ -98,4 +119,3 @@ func validateUserPayload(user *User) error {
 
 	return nil
 }
-

@@ -2,6 +2,7 @@ package main
 
 import "time"
 
+// json:name here means during parsing,unmarshalling(copy data from r.body to desired struct type) , name is used Name
 type CreateProjectPayload struct {
 	Name string `json:"name"`
 }

@@ -15,12 +15,12 @@ func main(){
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	}
-	sqlStorage:=connection(cfg)
-	db,err:=sqlStorage.Init()
+	sqlStorage:=connection(cfg)  // db.go
+	db,err:=sqlStorage.Init()    // creating tables db.go
 	if err!=nil{
-		log.Fatal(err)
+		log.Fatal(err) // fatal terminates code if err and prints it.
 	}
-	store:=Newstore(db)
-	server:=newserverAPI(":3001",*store)
-	server.run()
+	store:=Newstore(db)          //db.go
+	server:=newserverAPI(":3001",*store)   // api.go
+	server.run()   // api.go
 }

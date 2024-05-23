@@ -14,7 +14,7 @@ func connection(cfg mysql.Config)*Sqlstorage{
 	if err!=nil{
 		log.Fatal(err)
 	}
-	err=db.Ping()
+	err=db.Ping() // verifying connection
 	if err!=nil{
 		log.Fatal(err)
 	}
