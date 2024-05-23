@@ -26,3 +26,5 @@ To run the project, follow these steps:
    mysql -u root -p
    Enter password: [your_password]
    mysql> CREATE DATABASE projectmanager;
+
+2. Run on terminal `make run`
