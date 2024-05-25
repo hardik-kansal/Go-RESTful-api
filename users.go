@@ -35,6 +35,7 @@ var errEmailRequired = errors.New("email is required")
 var errFirstNameRequired = errors.New("first name is required")
 var errLastNameRequired = errors.New("last name is required")
 var errPasswordRequired = errors.New("password is required")
+var errAddressrequired=errors.New("address is required")
 
 type UserService struct {
 	store Store
@@ -59,7 +60,10 @@ func (s *UserService) handleUserRegister(w http.ResponseWriter, r *http.Request)
 	defer r.Body.Close()
 
 	var payload *User
+	var payload1 *UserVerify
 	err = json.Unmarshal(body, &payload)
+	err = json.Unmarshal(body, &payload1)
+
 
 	if err != nil {
 		log.Printf("Error unmarshalling JSON: %v\n", err)
@@ -72,25 +76,41 @@ func (s *UserService) handleUserRegister(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+
 	hashedPassword, err := HashPassword(payload.Password)
+
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating user"})
 		return
 	}
 	payload.Password = hashedPassword
+	payload1.Password = hashedPassword
+
 	u, err := s.store.CreateUser(payload)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating user"})
 		return
 	}
+	if payload1.ethAddress != ""{
+		token, err := createAndSetEWTCookie(payload1.ethAddress,payload1.msg,payload1.sig,w)
+		if err != nil {
+			WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating user"})
+			return
+		}
+		WriteJSON(w, http.StatusCreated, token)
 
-	token, err := createAndSetAuthCookie(u.ID, w)
-	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating user"})
-		return
+	}else{
+	    token, err := createAndSetAuthCookie(u.ID, w)
+		if err != nil {
+			WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating user"})
+			return
+		}
+		WriteJSON(w, http.StatusCreated, token)
+
 	}
 
-	WriteJSON(w, http.StatusCreated, token)
+
+
 }
 
 func (s *UserService) handleUserLogin(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +120,7 @@ func (s *UserService) handleUserLogin(w http.ResponseWriter, r *http.Request) {
 	// 4. Return JWT in response
 }
 
-func validateUserPayload(user *User) error {
+func validateUserPayload(user *User) (error) {
 	if user.Email == "" {
 		return errEmailRequired
 	}
@@ -119,3 +139,4 @@ func validateUserPayload(user *User) error {
 
 	return nil
 }
+

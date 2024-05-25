@@ -64,26 +64,6 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 		return []byte(secret), nil
 	})
 }
-
-func permissionDenied(w http.ResponseWriter) {
-	WriteJSON(w, http.StatusUnauthorized, ErrorResponse{
-		Error: fmt.Errorf("permission denied").Error(),
-	})
-}
-func GetTokenFromRequest(r *http.Request) string {
-	tokenAuth := r.Header.Get("Authorization")
-	tokenQuery := r.URL.Query().Get("token")
-
-	if tokenAuth != "" {
-		return tokenAuth
-	}
-
-	if tokenQuery != "" {
-		return tokenQuery
-	}
-
-	return ""
-}
 func createAndSetAuthCookie(userID int64, w http.ResponseWriter) (string, error) {
 	secret := []byte("randomjwtsecretkey")
 	token, err := CreateJWT(secret, userID)

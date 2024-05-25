@@ -48,3 +48,15 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+type UserVerify struct {
+	ID        int64     `json:"id"`
+	Email     string    `json:"email"`
+	FirstName string    `json:"firstName"`
+	LastName  string    `json:"lastName"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"createdAt"`
+	ethAddress string   `json: "address"`
+	msg string          `json:"message"`
+	sig string          `json:"signature"`
+
+}

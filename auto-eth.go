@@ -1,91 +1,54 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
+
 	"github.com/hardik-kansal/gobank/ewt"
 )
 
 func WithEWTAuth(handlerFunc http.HandlerFunc, store Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := GetTokenFromRequest(r)
-		token, err := validateJWT(tokenString)
-		if err != nil {
-			log.Printf("failed to validate token: %v", err)
+		check,token := validateEWT(tokenString)
+		if check == false {
+			log.Printf("failed to validate token")
 			permissionDenied(w)
 			return
 		}
-
-		if !token.Valid {
-			log.Println("invalid token")
-			permissionDenied(w)
-			return
-		}
-
-		claims := token.Claims.(jwt.MapClaims)
-		userID := claims["userID"].(string)
-
-		_, err = store.GetUserByID(userID)
-		if err != nil {
-			log.Printf("failed to get user by id: %v", err)
-			permissionDenied(w)
-			return
-		}
+		log.Printf("address of user authorized is %v",token.SigResponse.Address)
 		handlerFunc(w, r)
 	}
 }
 
-func CreateEWT(secret []byte, userID int64) (string, error) {
-// create token and add address and userID
-	if err != nil {
-		return "", err
+func CreateEWT(addr string, sig string, mssg string) string {
+	sigRes := ewt.SignatureResponse{
+		Address: addr,
+		Msg:     mssg,
+		Sig:     sig,
+		Version: "2",
 	}
-
-	return tokenString, err
+	token := ewt.Token{
+		SigResponse: sigRes,
+		Expirydate:  time.Now().Add(10 * 24 * time.Hour),
+		Valid:       true,
+	}
+	return token.String()
 }
 
-func validateJWT(tokenString string) (*jwt.Token, error) {
-	secret := []byte("randomjwtsecretkey")
-
-	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(secret), nil
-	})
-}
-
-func permissionDenied(w http.ResponseWriter) {
-	WriteJSON(w, http.StatusUnauthorized, ErrorResponse{
-		Error: fmt.Errorf("permission denied").Error(),
-	})
-}
-func GetTokenFromRequest(r *http.Request) string {
-	tokenAuth := r.Header.Get("Authorization")
-	tokenQuery := r.URL.Query().Get("token")
-
-	if tokenAuth != "" {
-		return tokenAuth
+func validateEWT(token1 string) (bool,ewt.Token) {
+	var token ewt.Token
+	token.FromJSON(token1)
+	check := ewt.VerifySig(token.SigResponse.Sig, token.SigResponse.Address, token.SigResponse.Msg)
+	if time.Now().Before(token.Expirydate) {
+		token.Valid = true
 	}
 
-	if tokenQuery != "" {
-		return tokenQuery
-	}
-
-	return ""
+	return check,token
 }
-func createAndSetAuthCookie(userID int64, w http.ResponseWriter) (string, error) {
-	secret := []byte("randomjwtsecretkey")
-	token, err := CreateJWT(secret, userID)
-
-	if err != nil {
-		return "", err
-	}
-
+func createAndSetEWTCookie(addr string, mssg string, sig string, w http.ResponseWriter) (string, error) {
+	token := CreateEWT(addr, sig, mssg)
 	http.SetCookie(w, &http.Cookie{
 		Name:  "Authorization",
 		Value: token,
