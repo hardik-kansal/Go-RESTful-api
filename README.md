@@ -16,6 +16,36 @@ This project consists of various components:
 - **auth.go**: Handles JWT authentication.
 - **config.go**: Retrieves environment variables.
 
+## Ethereum Web Token (EWT) Authentication
+
+This project implements Ethereum Web Token (EWT) based authentication for HTTP handlers. The implementation includes creating, validating, and managing EWTs.
+
+### Overview
+
+The project contains functionality to:
+- Sign messages with an Ethereum private key.
+- Verify signatures.
+- Create tokens that include a signature response and an expiry date.
+- Validate tokens and use them for HTTP authentication.
+
+## Package `ewt`
+
+### Types
+
+#### `SignatureResponse`
+
+Represents the structure of the signature response.
+
+```go
+type SignatureResponse struct {    
+	Address string `json:"address,omitempty"`    
+	Msg     string `json:"msg,omitempty"`    
+	Sig     string `json:"sig,omitempty"`    
+	Version string `json:"version,omitempty"`
+}
+
+
+
 ## Installation
 
 To run the project, follow these steps:
